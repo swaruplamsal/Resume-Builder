@@ -146,7 +146,7 @@ export default function Home() {
 
             {/* Feature 3 */}
             <div className="group p-8 rounded-2xl border border-border bg-white hover:shadow-lg transition-all duration-300 hover:-translate-y-1 animate-fade-in-up delay-300">
-              <div className="w-12 h-12 rounded-xl bg-primary-light flex items-center justify-center mb-5 group-hover:scale-110 transition-transform">
+              <div className="w-12 h-12 rounded-xl bg-green-50 flex items-center justify-center mb-5 group-hover:scale-110 transition-transform">
                 <svg
                   className="w-6 h-6 text-success"
                   fill="none"
@@ -232,7 +232,7 @@ export default function Home() {
               </p>
               <Link
                 href="/builder"
-                className="inline-flex items-center gap-2 px-8 py-3.5 text-base font-semibold text-primary bg-white rounded-xl hover:bg-surface-hover transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg"
+                className="inline-flex items-center gap-2 px-8 py-3.5 text-base font-semibold text-primary bg-white rounded-xl hover:bg-gray-50 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg"
               >
                 Get Started Free
                 <svg

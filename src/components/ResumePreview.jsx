@@ -1,19 +1,114 @@
 "use client";
 
 export default function ResumePreview({ data }) {
+  const escapeHtml = (value = "") =>
+    String(value)
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#039;");
+
+  const buildPrintableResume = (resumeData) => {
+    const skills = (resumeData.skills || "")
+      .split(",")
+      .map((skill) => skill.trim())
+      .filter(Boolean);
+
+    const printableWrapper = document.createElement("div");
+    printableWrapper.style.position = "fixed";
+    printableWrapper.style.left = "-10000px";
+    printableWrapper.style.top = "0";
+    printableWrapper.style.width = "816px";
+    printableWrapper.style.background = "#ffffff";
+    printableWrapper.style.color = "#111827";
+    printableWrapper.style.fontFamily = "Georgia, 'Times New Roman', serif";
+
+    printableWrapper.innerHTML = `
+      <div style="padding: 48px;">
+        <div style="text-align: center; border-bottom: 2px solid #1f2937; padding-bottom: 20px; margin-bottom: 24px;">
+          <h1 style="font-size: 32px; font-weight: 700; color: #111827; letter-spacing: 0.02em; margin: 0 0 8px 0;">
+            ${escapeHtml(resumeData.name || "")}
+          </h1>
+          <p style="font-size: 14px; color: #4b5563; margin: 0; line-height: 1.6;">
+            ${escapeHtml(resumeData.email || "")}${
+              resumeData.email && resumeData.phone ? " | " : ""
+            }${escapeHtml(resumeData.phone || "")}
+          </p>
+        </div>
+
+        ${
+          resumeData.degree || resumeData.college
+            ? `
+          <div style="margin-bottom: 24px;">
+            <h2 style="font-size: 12px; font-weight: 700; color: #111827; text-transform: uppercase; letter-spacing: 0.12em; border-bottom: 1px solid #d1d5db; padding-bottom: 4px; margin: 0 0 12px 0;">
+              Education
+            </h2>
+            ${
+              resumeData.degree
+                ? `<p style="font-size: 16px; font-weight: 600; color: #1f2937; margin: 0 0 4px 0;">${escapeHtml(
+                    resumeData.degree
+                  )}</p>`
+                : ""
+            }
+            ${
+              resumeData.college
+                ? `<p style="font-size: 14px; color: #4b5563; margin: 0;">${escapeHtml(
+                    resumeData.college
+                  )}</p>`
+                : ""
+            }
+          </div>
+        `
+            : ""
+        }
+
+        ${
+          skills.length
+            ? `
+          <div style="margin-bottom: 24px;">
+            <h2 style="font-size: 12px; font-weight: 700; color: #111827; text-transform: uppercase; letter-spacing: 0.12em; border-bottom: 1px solid #d1d5db; padding-bottom: 4px; margin: 0 0 12px 0;">
+              Skills
+            </h2>
+            <div>
+              ${skills
+                .map(
+                  (skill) =>
+                    `<span style="display: inline-block; margin: 0 8px 8px 0; padding: 4px 12px; background: #f3f4f6; color: #374151; border-radius: 6px; font-size: 13px;">${escapeHtml(
+                      skill
+                    )}</span>`
+                )
+                .join("")}
+            </div>
+          </div>
+        `
+            : ""
+        }
+      </div>
+    `;
+
+    return printableWrapper;
+  };
+
   const downloadPDF = async () => {
     const html2pdf = (await import("html2pdf.js")).default;
-    const element = document.getElementById("resume");
-    html2pdf()
-      .set({
-        margin: 0,
-        filename: `${data?.name || "resume"}.pdf`,
-        image: { type: "jpeg", quality: 0.98 },
-        html2canvas: { scale: 2 },
-        jsPDF: { unit: "in", format: "letter", orientation: "portrait" },
-      })
-      .from(element)
-      .save();
+    const printableElement = buildPrintableResume(data || {});
+
+    document.body.appendChild(printableElement);
+    try {
+      await html2pdf()
+        .set({
+          margin: 0,
+          filename: `${data?.name || "resume"}.pdf`,
+          image: { type: "jpeg", quality: 0.98 },
+          html2canvas: { scale: 2, backgroundColor: "#ffffff", useCORS: true },
+          jsPDF: { unit: "in", format: "letter", orientation: "portrait" },
+        })
+        .from(printableElement)
+        .save();
+    } finally {
+      printableElement.remove();
+    }
   };
 
   if (!data)
@@ -52,7 +147,7 @@ export default function ResumePreview({ data }) {
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-lg font-semibold text-text-heading">Preview</h2>
         <button
-          className="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-medium text-white bg-success rounded-xl hover:shadow-lg transition-all duration-300 hover:-translate-y-0.5 cursor-pointer"
+          className="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-medium text-white bg-gradient-to-r from-success to-emerald-600 rounded-xl hover:shadow-lg transition-all duration-300 hover:-translate-y-0.5 cursor-pointer"
           onClick={downloadPDF}
         >
           <svg
@@ -80,16 +175,16 @@ export default function ResumePreview({ data }) {
           style={{ fontFamily: "Georgia, 'Times New Roman', serif" }}
         >
           {/* Header */}
-          <div className="text-center border-b-2 border-[#1f2937] pb-5 mb-6">
-            <h1 className="text-3xl font-bold text-[#111827] tracking-wide mb-2">
+          <div className="text-center border-b-2 border-gray-800 pb-5 mb-6">
+            <h1 className="text-3xl font-bold text-gray-900 tracking-wide mb-2">
               {data.name}
             </h1>
-            <div className="flex items-center justify-center gap-4 text-sm text-[#4b5563]">
+            <div className="flex items-center justify-center gap-4 text-sm text-gray-600">
               {data.email && (
                 <span className="flex items-center gap-1">{data.email}</span>
               )}
               {data.email && data.phone && (
-                <span className="text-[#9ca3af]">|</span>
+                <span className="text-gray-400">|</span>
               )}
               {data.phone && (
                 <span className="flex items-center gap-1">{data.phone}</span>
@@ -100,18 +195,18 @@ export default function ResumePreview({ data }) {
           {/* Education */}
           {(data.degree || data.college) && (
             <div className="mb-6">
-              <h2 className="text-sm font-bold text-[#111827] uppercase tracking-widest border-b border-[#d1d5db] pb-1 mb-3">
+              <h2 className="text-sm font-bold text-gray-900 uppercase tracking-widest border-b border-gray-300 pb-1 mb-3">
                 Education
               </h2>
               <div className="flex justify-between items-start">
                 <div>
                   {data.degree && (
-                    <p className="text-base font-semibold text-[#1f2937]">
+                    <p className="text-base font-semibold text-gray-800">
                       {data.degree}
                     </p>
                   )}
                   {data.college && (
-                    <p className="text-sm text-[#4b5563]">{data.college}</p>
+                    <p className="text-sm text-gray-600">{data.college}</p>
                   )}
                 </div>
               </div>
@@ -121,14 +216,14 @@ export default function ResumePreview({ data }) {
           {/* Skills */}
           {data.skills && (
             <div className="mb-6">
-              <h2 className="text-sm font-bold text-[#111827] uppercase tracking-widest border-b border-[#d1d5db] pb-1 mb-3">
+              <h2 className="text-sm font-bold text-gray-900 uppercase tracking-widest border-b border-gray-300 pb-1 mb-3">
                 Skills
               </h2>
               <div className="flex flex-wrap gap-2">
                 {data.skills.split(",").map((skill, index) => (
                   <span
                     key={index}
-                    className="px-3 py-1 bg-[#f3f4f6] text-[#374151] text-sm rounded-md"
+                    className="px-3 py-1 bg-gray-100 text-gray-700 text-sm rounded-md"
                   >
                     {skill.trim()}
                   </span>
