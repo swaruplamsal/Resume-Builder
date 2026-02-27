@@ -11,7 +11,7 @@ export default function Builder() {
       <div className="max-w-7xl mx-auto px-6 py-10">
         <div className="flex flex-col lg:flex-row gap-10">
           {/* Left: Form Panel */}
-          <div className="lg:w-[420px] shrink-0">
+          <div className="lg:w-[500px] shrink-0">
             <div className="sticky top-24 bg-surface border border-border rounded-2xl p-8 shadow-sm">
               <ResumeForm setData={setData} />
             </div>
